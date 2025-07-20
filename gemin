@@ -85,7 +85,18 @@ main() {
             ;;
         *)
             # Default command: run gemini with provided arguments
-            run_gemini "$@"
+            local args=()
+            for arg in "$@"; do
+                case "$arg" in
+                    -s|--sandbox)
+                        # skip
+                        ;;
+                    *)
+                        args+=("$arg")
+                        ;;
+                esac
+            done
+            run_gemini "${args[@]+${args[@]}}"
             ;;
     esac
 }
