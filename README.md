@@ -1,6 +1,11 @@
 # GemIn
 
-**GemIn** is a tool for running the **Gem**ini CLI **in**side a Docker container. By using this tool, you don't need to install Node.js on your host system. AI agents run safely in an isolated container environment, providing a clean and easy Gemini execution environment.
+**GemIn** is a tool for running the **Gem**ini CLI **in**side a Docker container. By using this tool, you don't need to install Node.js on your host system. GemIn is designed to make your Gemini CLI experience safe, clean, and easy.
+
+It offers several key advantages:
+- **Safe Execution**: AI agents run securely in an isolated container.
+- **Clean Environment**: No need to install Node.js on your host system.
+- **Easy User Switching**: Seamlessly switch between different authenticated users for various projects or accounts.
 
 ## Prerequisites
 
@@ -15,39 +20,28 @@ chmod +x gemin
 sudo mv gemin /usr/local/bin/
 ```
 
-## Uninstallation
-
-To uninstall GemIn completely:
-
-```bash
-# Remove the binary
-sudo rm /usr/local/bin/gemin
-
-# Remove configuration directory
-rm -rf ~/.gemin
-
-# Remove Docker image
-docker rmi ghcr.io/hiochiai/gemin:latest
-```
-
 ## Quick Start
 
 ### 1. Initial Setup
+
+Run the `init` command to perform the initial setup.
 
 ```bash
 gemin init
 ```
 
-This command performs the Gemini CLI configuration process and automatically starts interactive mode after setup completion. This follows exactly the same setup procedure as a regular Gemini CLI installation:
+This command guides you through the Gemini CLI configuration process:
 
-1. **Theme Selection** - Choose the CLI appearance
-2. **Authentication Method Selection** - Usually select "Login with Google"  
-3. **Authentication Execution** - A Google authentication link will be displayed in the terminal
-4. **Interactive Mode** - After setup completion, the Gemini CLI starts and you can begin chatting
+1.  **Theme Selection**: Choose the CLI appearance.
+2.  **Authentication**: Select "Login with Google" and follow the authentication link displayed in the terminal.
+3.  **Start Chatting**: After setup, the Gemini CLI starts in interactive mode.
 
-**Important**: Since this runs in a container, the authentication web page will not automatically open in your browser. Please manually click the displayed link to proceed with authentication.
+> [!IMPORTANT]
+> Since this runs in a container, the authentication web page will not automatically open in your browser. Please manually click the displayed link to proceed with authentication.
 
-Terminal output example:
+<details>
+<summary>Terminal output example</summary>
+
 ```
 Code Assist login required.
 Attempting to open authentication page in your browser.
@@ -58,54 +52,43 @@ https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=http%3A%2F%2Flocalhost
 
 Waiting for authentication...
 ```
+</details>
 
-After successful authentication, the Gemini CLI will start in interactive mode, and you can start chatting.
+Once you exit the CLI, you can start a new session anytime by simply running `gemin`.
 
-Once you exit the CLI, you can run interactive mode anytime by simply running the `gemin` command. You do not need to run `gemin init` again unless you want to reset your configuration.
-
-## Command List
+## Commands
 
 ### `gemin` (default)
 
-Runs the Gemini CLI inside a container. The current directory is mounted into the container.
+Runs the Gemini CLI inside a container, mounting the current directory.
 
 **Basic usage:**
 ```bash
 gemin
 ```
+*→ Equivalent to `gemini --yolo` inside the container.*
 
-*→ Equivalent to running `gemini --yolo` inside the container*
-
-**Add Gemini CLI Options:**
+**With Gemini CLI Options:**
 ```bash
 gemin --all-files
 ```
+*→ Equivalent to `gemini --yolo --all-files` inside the container.*
 
-*→ Equivalent to running `gemini --yolo --all-files` inside the container*
-
-> [!IMPORTANT]
+> [!NOTE]
 > The `--sandbox` option is not available.
 
 ### `gemin init`
 
-Performs the initial setup for the Gemini CLI. After the setup is complete, it automatically starts an interactive session.
+Performs the initial setup for the Gemini CLI.
 
 **Usage:**
 ```bash
 gemin init
 ```
+*→ Removes existing config and runs `gemini --debug --yolo` inside the container.*
 
-*→ Removes existing config and runs `gemini --debug --yolo` inside the container*
-
-> [!IMPORTANT]
-> When using the `init` command, this tool uses `docker run` with the `--network host` option to allow the authentication callback from Google. This means the container shares the host's network stack, which can have security implications. Please be aware of this when running the initial setup.
-
-**Specifying Google Cloud Project ID:**
-```bash
-GOOGLE_CLOUD_PROJECT=your-project-id gemin init
-```
-
-*→ Removes existing config, saves GOOGLE_CLOUD_PROJECT to .env, and runs `gemini --debug --yolo` inside the container*
+> [!WARNING]
+> The `init` command uses `docker run` with the `--network host` option to allow the authentication callback from Google. This means the container shares the host's network stack, which can have security implications.
 
 ### `gemin pull`
 
@@ -117,7 +100,59 @@ gemin pull
 
 ## Configuration
 
-Configuration files are stored in the `~/.gemin` directory.
+### Configuration Directory
+
+Configuration files are stored in `~/.gemin` by default. You can customize this using the `GEMIN_CONFIG_DIR` environment variable.
+
+### Environment Variables
+
+You can customize GemIn's behavior using the following environment variables.
+
+| Variable | Description | Default Value | Used by Commands |
+| :--- | :--- | :--- | :--- |
+| `GEMIN_CONFIG_DIR` | Specifies a custom configuration directory. Useful for switching between authenticated users. | `~/.gemin` | `gemin`, `gemin init` |
+| `GEMIN_IMAGE` | Specifies a custom Docker image. | `ghcr.io/hiochiai/gemin` | `gemin`, `gemin init`, `gemin pull` |
+| `GOOGLE_CLOUD_PROJECT` | Specifies the Google Cloud Project ID to use for authentication. This is saved to a `.env` file within the configuration directory during `init`. | (none) | `gemin init` |
+
+**Example: Switching between users**
+
+```bash
+# Set up user1 (default)
+gemin init
+
+# Set up user2 with a different configuration directory
+GEMIN_CONFIG_DIR=~/.gemin-user2 gemin init
+
+# Run as user1
+gemin
+
+# Run as user2
+GEMIN_CONFIG_DIR=~/.gemin-user2 gemin
+```
+
+**Example: Specifying a Project ID during setup**
+
+```bash
+GOOGLE_CLOUD_PROJECT=your-project-id gemin init
+```
+
+## Uninstallation
+
+To uninstall GemIn completely:
+
+```bash
+# Remove the binary
+sudo rm /usr/local/bin/gemin
+
+# Remove default configuration directory
+rm -rf ~/.gemin
+
+# Remove Docker image
+docker rmi ghcr.io/hiochiai/gemin:latest
+```
+
+> [!NOTE]
+> If you have created other configuration directories using the `GEMIN_CONFIG_DIR` environment variable, please remove them manually.
 
 ## License
 
