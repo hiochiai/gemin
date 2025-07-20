@@ -1,0 +1,94 @@
+#!/bin/bash
+
+# GemIn - Interface for Gemini CLI in a Container
+# Usage: gemin <command> [options]
+
+set -euo pipefail
+
+# Configuration
+IMAGE_NAME="${GEMIN_IMAGE:-ghcr.io/hiochiai/gemin}"
+CONFIG_DIR="${GEMIN_CONFIG_DIR:-$HOME/.gemin}"
+
+# Initialize configuration directory
+init_config_dir() {
+    # Create configuration directory
+    if [ ! -d "$CONFIG_DIR" ]; then
+        mkdir -p "$CONFIG_DIR"
+    fi
+    
+    # Save environment variables
+    if [ -n "$GOOGLE_CLOUD_PROJECT" ]; then
+        echo "GOOGLE_CLOUD_PROJECT=$GOOGLE_CLOUD_PROJECT" > "$CONFIG_DIR/.env"
+        echo "Saved Google Cloud Project ID: $GOOGLE_CLOUD_PROJECT"
+    fi
+}
+
+# Function to run Gemini CLI in a Docker container
+run_gemini() {
+    local docker_opts=()
+    local gemini_args=()
+
+    if [ "${1:-}" = "init" ]; then
+        # For the 'init' command, use host network and pass specific args
+        docker_opts+=(--network host)
+        gemini_args+=(--debug --yolo)
+    else
+        # For all other commands, pass arguments through
+        gemini_args+=(--yolo "$@")
+    fi
+
+    docker run \
+        --entrypoint /usr/local/bin/gemini \
+        "${docker_opts[@]+${docker_opts[@]}}" \
+        -v "$CONFIG_DIR:/root/.gemini" \
+        -v "$(pwd):/work" \
+        --rm -it "$IMAGE_NAME:latest" \
+        "${gemini_args[@]+${gemini_args[@]}}"
+}
+
+# Main processing
+main() {
+    case "${1:-}" in
+        init)
+            # Remove existing configuration and run setup
+            if [ -d "$CONFIG_DIR" ]; then
+                rm -rf "$CONFIG_DIR"
+            fi
+            init_config_dir
+
+            # Run Gemini CLI in container for setup
+            run_gemini "init"
+            ;;
+        pull)
+            docker pull "$IMAGE_NAME:latest"
+            ;;
+        --help|-h)
+            echo "Usage: gemin <command> [options]"
+            echo ""
+            echo "Commands:"
+            echo "  [options]        Run Gemini CLI in container (default command)"
+            echo "  init             Start Gemini CLI with initial setup"
+            echo "  pull             Pull latest gemin image from Docker"
+            echo "  --help, -h       Show this help message"
+            echo ""
+            echo "Environment Variables:"
+            echo "  GOOGLE_CLOUD_PROJECT  Google Cloud Project ID (saved to ~/.gemin/.env)"
+            echo "                        Only effective when used with the 'init' command"
+            echo ""
+            echo "Examples:"
+            echo "  gemin"
+            echo "  gemin init"
+            echo "  GOOGLE_CLOUD_PROJECT=my-project gemin init"
+            echo "  gemin --all-files"
+            echo "  gemin pull"
+            exit 0
+            ;;
+        *)
+            # Default command: run gemini with provided arguments
+            run_gemini "$@"
+            ;;
+    esac
+}
+
+# Execute script
+main "$@"
