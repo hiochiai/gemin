@@ -1,6 +1,6 @@
 FROM node:24-alpine
 
-ARG GEMINI_CLI_VERSION=0.5.1
+ARG GEMINI_CLI_VERSION=latest
 
 RUN apk add --no-cache \
     bash \
