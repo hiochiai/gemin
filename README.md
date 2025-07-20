@@ -22,8 +22,6 @@ sudo mv gemin /usr/local/bin/
 
 ## Quick Start
 
-### 1. Initial Setup
-
 Run the `init` command to perform the initial setup.
 
 ```bash
