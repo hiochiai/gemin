@@ -30,9 +30,7 @@ run_gemini() {
     local gemini_args=()
 
     if [ "${1:-}" = "init" ]; then
-        # For the 'init' command, use host network and pass specific args
-        docker_opts+=(--network host)
-        gemini_args+=(--debug --yolo)
+        gemini_args+=(--yolo)
     else
         # For all other commands, pass arguments through
         gemini_args+=(--yolo "$@")
