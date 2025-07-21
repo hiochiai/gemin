@@ -8,6 +8,7 @@ set -euo pipefail
 # Configuration
 IMAGE_NAME="${GEMIN_IMAGE:-ghcr.io/hiochiai/gemin}"
 CONFIG_DIR="${GEMIN_CONFIG_DIR:-$HOME/.gemin}"
+GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT:-}
 
 # Initialize configuration directory
 init_config_dir() {
