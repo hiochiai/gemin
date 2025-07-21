@@ -20,39 +20,41 @@ chmod +x gemin
 sudo mv gemin /usr/local/bin/
 ```
 
-## Quick Start
+## Getting Started
 
-Run the `init` command to perform the initial setup.
+Run the `init` command to perform the initial setup. This is a multi-step process due to the containerized environment.
+
+### Step 1: Start the Authentication Process
 
 ```bash
 gemin init
 ```
 
-This command guides you through the Gemini CLI configuration process:
+This command starts the Gemini CLI and guides you through the initial setup:
 
-1.  **Theme Selection**: Choose the CLI appearance.
-2.  **Authentication**: Select "Login with Google" and follow the authentication link displayed in the terminal.
-3.  **Start Chatting**: After setup, the Gemini CLI starts in interactive mode.
+1.  **Theme Selection**: Choose your preferred CLI appearance.
+2.  **Authentication Method**: Select "Login with Google".
+3.  The CLI will display a message like `Logging in with Google... Please restart Gemini CLI to continue.` and then exit.
 
-> [!IMPORTANT]
-> Since this runs in a container, the authentication web page will not automatically open in your browser. Please manually click the displayed link to proceed with authentication.
+### Step 2: Retrieve the Authentication URL
 
-<details>
-<summary>Terminal output example</summary>
+After the first step, run `gemin` again.
 
+```bash
+gemin
 ```
-Code Assist login required.
-Attempting to open authentication page in your browser.
-Otherwise navigate to:
 
-https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=http%3A%2F%2Flocalhost%3A58923%2Foauth2callback&access_type=offline&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloud-platform%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile&state=7b4f8e2d9c1a6e5f0b3d8a7e4c9f2b5e8a1d4c7f0e3b6a9d2f5e8b1c4a7e0d3f6&response_type=code&client_id=123456789012-abcd1234efgh5678ijkl9012mnop3456.apps.googleusercontent.com
+The CLI will now display an authentication URL.
 
+The authentication web page will not automatically open in your browser. **You must manually copy the full URL and paste it into your web browser.**
 
-Waiting for authentication...
-```
-</details>
+### Step 3: Authorize and Enter the Code
 
-Once you exit the CLI, you can start a new session anytime by simply running `gemin`.
+1.  After opening the URL in your browser, log in with your Google account and grant the necessary permissions.
+2.  A **verification code** will be displayed in your browser.
+3.  Copy this code and paste it back into the waiting terminal.
+
+Once the code is entered correctly, authentication is complete. You can start chatting with Gemini. To start a new session in the future, simply run `gemin`.
 
 ## Commands
 
@@ -83,10 +85,7 @@ Performs the initial setup for the Gemini CLI.
 ```bash
 gemin init
 ```
-*→ Removes existing config and runs `gemini --debug --yolo` inside the container.*
-
-> [!WARNING]
-> The `init` command uses `docker run` with the `--network host` option to allow the authentication callback from Google. This means the container shares the host's network stack, which can have security implications.
+*→ Removes existing config and runs `gemini --yolo` inside the container to start the multi-step authentication process.*
 
 ### `gemin pull`
 
